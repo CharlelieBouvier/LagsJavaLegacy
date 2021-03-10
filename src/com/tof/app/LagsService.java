@@ -75,6 +75,7 @@ class LagsService {
         System.out.println("AJOUTER UN ORDRE");
         System.out.println("FORMAT = ID;DEBUT;FIN;PRIX");
         Scanner in = new Scanner(System.in);
+        in.nextLine();
         String line = in.nextLine().toUpperCase();
         String[] champs = line.split(";");
         String chp1 = champs[0];
