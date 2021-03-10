@@ -7,139 +7,114 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.StandardOpenOption;
 
-class LagsService {
-    private ArrayList<Ordre> listOrdre = new ArrayList<Ordre>();
+import static java.util.Comparator.*;
 
-    // lit le fihier des ordres et calcule le CA
-    public void getFichierOrder(String fileName) {
+class LagsService {
+    private List<Order> orders = new ArrayList<>();
+
+    public void loadOrdersFromFile(String fileName) {
         try {
 
             for (String line : Files.readAllLines(Paths.get(fileName), StandardCharsets.UTF_8)) {
-                String[] champs = line.split(";");
-                String chp1 = champs[0];
-                int chp2 = Integer.parseInt(champs[1]);
-                int champ3 = Integer.parseInt(champs[2]);
-                double chp4 = Double.parseDouble(champs[3]);
-                Ordre ordre = new Ordre(chp1, chp2, champ3, chp4);
-                listOrdre.add(ordre);
+                String[] fields = line.split(";");
+                String id = fields[0];
+                int startDate = Integer.parseInt(fields[1]);
+                int duration = Integer.parseInt(fields[2]);
+                double price = Double.parseDouble(fields[3]);
+                Order order = new Order(id, startDate, duration, price);
+                orders.add(order);
 
             }
         } catch (IOException e) {
             System.out.println("FICHIER ORDRES.CSV NON TROUVE. CREATION FICHIER.");
-            writeOrdres(fileName);
+            saveOrders(fileName);
         }
     }
 
-    // écrit le fichier des ordres
-    void writeOrdres(String nomFich) {
-        List<String> lines = new ArrayList<String>();
-        for (int i = 0; i < listOrdre.size(); i++) {
-            Ordre ordre = listOrdre.get(i);
-            String ligneCSV = new String();
-            ligneCSV = ordre.getId() + ";" + Integer.toString(ordre.getDebut()) + ";" + Integer.toString(ordre.getDuree()) + ";" + Double.toString(ordre.prix());
-            lines.add(ligneCSV);
+    void saveOrders(String fileName) {
+        List<String> lines = new ArrayList<>();
+        for (Order order : orders) {
+            lines.add(order.getId() + ";" + order.getStartDate() + ";" + order.getDuration() + ";" + order.getPrice());
         }
         try {
-            Files.write(Paths.get(nomFich), lines, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND, StandardOpenOption.WRITE);
+            Files.write(Paths.get(fileName), lines, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND, StandardOpenOption.WRITE);
         } catch (IOException e) {
             System.out.println("PROBLEME AVEC FICHIER");
         }
     }
 
-
-    // affiche la liste des ordres
-    public void liste() {
-        Collections.sort(listOrdre, new Comparator<Ordre>() {
-            @Override
-            public int compare(Ordre o1, Ordre o2) {
-                return o1.getDebut() - o2.getDebut(); // use your logic, Luke
-            }
-        });
+    public void listOrders() {
+        orders.sort(comparingInt(Order::getStartDate));
         System.out.println("LISTE DES ORDRES\n");
         System.out.format("%8s %8s %5s %13s", "ID", "DEBUT", "DUREE", "PRIX\n");
         System.out.format("%8s %8s %5s %13s", "--------", "-------", "-----", "----------\n");
-        for (int i = 0; i < listOrdre.size(); i++) {
-            Ordre ordre = listOrdre.get(i);
-            afficherOrdre(ordre);
+        for (Order order : orders) {
+            printOrder(order);
         }
         System.out.format("%8s %8s %5s %13s", "--------", "-------", "-----", "----------\n");
     }
 
-    public void afficherOrdre(Ordre ordre) {
-        System.out.format("%8s %8d %5d %10.2f\n", ordre.getId(), ordre.getDebut(), ordre.getDuree(), ordre.prix());
+    public void printOrder(Order order) {
+        System.out.format("%8s %8d %5d %10.2f\n", order.getId(), order.getStartDate(), order.getDuration(), order.getPrice());
 
     }
 
-    // Ajoute un ordre; le CA est recalculé en conséquence
-    public void ajouterOrdre() {
+    public void addOrder() {
         System.out.println("AJOUTER UN ORDRE");
         System.out.println("FORMAT = ID;DEBUT;FIN;PRIX");
         Scanner in = new Scanner(System.in);
         in.nextLine();
         String line = in.nextLine().toUpperCase();
-        String[] champs = line.split(";");
-        String chp1 = champs[0];
-        int chp2 = Integer.parseInt(champs[1]);
-        int champ3 = Integer.parseInt(champs[2]);
-        double chp4 = Double.parseDouble(champs[3]);
-        Ordre ordre = new Ordre(chp1, chp2, champ3, chp4);
-        listOrdre.add(ordre);
-        writeOrdres("ordres.csv");
+        String[] fields = line.split(";");
+        String id = fields[0];
+        int startDate = Integer.parseInt(fields[1]);
+        int duration = Integer.parseInt(fields[2]);
+        double price = Double.parseDouble(fields[3]);
+        Order order = new Order(id, startDate, duration, price);
+        orders.add(order);
+        saveOrders("orders.csv");
     }
 
-    // MAJ du fichier
-    public void suppression() {
+    public void deleteOrder() {
         System.out.println("SUPPRIMER UN ORDRE");
         System.out.println("ID:");
         String id = System.console().readLine().toUpperCase();
-        for (Iterator<Ordre> iter = listOrdre.listIterator(); iter.hasNext(); ) {
-            Ordre o = iter.next();
+        for (Iterator<Order> iter = orders.listIterator(); iter.hasNext(); ) {
+            Order o = iter.next();
             if (o.getId().equals(id)) {
                 iter.remove();
             }
         }
-        writeOrdres("ORDRES.CSV");
+        saveOrders("ORDRES.CSV");
     }
 
-    private double ca(List<Ordre> ordres, boolean debug) {
-        // si aucun ordre, job done, TROLOLOLO..
-        if (ordres.size() == 0)
+    private double revenue(List<Order> orders, boolean debug) {
+        if (orders.size() == 0)
             return 0.0;
-        Ordre order = ordres.get(0);
-        // attention ne marche pas pour les ordres qui depassent la fin de l'année
-        // voir ticket PLAF nO 4807
-        List<Ordre> liste = new ArrayList<Ordre>();
-        for (Iterator<Ordre> iter = listOrdre.listIterator(); iter.hasNext(); ) {
-            Ordre o = iter.next();
-            if (o.getDebut() >= order.getDebut() + order.getDuree()) {
-                liste.add(o);
+        Order firstOrder = orders.get(0);
+        List<Order> compatibleOrders = new ArrayList<>();
+        for (Order o : this.orders) {
+            if (o.getStartDate() >= firstOrder.getStartDate() + firstOrder.getDuration()) {
+                compatibleOrders.add(o);
             }
         }
-        List<Ordre> liste2 = new ArrayList<Ordre>();
-        for (int i = 1; i < ordres.size(); i++) {
-            liste2.add(ordres.get(i));
+        List<Order> followingOrders = new ArrayList<>();
+        for (int i = 1; i < orders.size(); i++) {
+            followingOrders.add(orders.get(i));
         }
-        double ca = order.prix() + ca(liste, debug);
-        // Lapin compris?
-        double ca2 = ca(liste2, debug);
+        double revenueWithFirstOrder = firstOrder.getPrice() + revenue(compatibleOrders, debug);
+        double revenueWithFollowingOrders = revenue(followingOrders, debug);
         if (debug) {
-            System.out.format("%10.2f\n", Math.max(ca, ca2));
+            System.out.format("%10.2f\n", Math.max(revenueWithFirstOrder, revenueWithFollowingOrders));
         } else
             System.out.print(".");
-        return Math.max(ca, ca2); // LOL
+        return Math.max(revenueWithFirstOrder, revenueWithFollowingOrders);
     }
 
-
-    public void calculerLeCA(boolean debug) {
+    public void computeRevenue(boolean debug) {
         System.out.println("CALCUL CA..");
-        Collections.sort(listOrdre, new Comparator<Ordre>() {
-            @Override
-            public int compare(Ordre o1, Ordre o2) {
-                return o1.getDebut() - o2.getDebut(); // use your logic, Luke
-            }
-        });
-        double ca = ca(listOrdre, debug);
-        System.out.format("CA: %10.2f\n", ca);
+        orders.sort(comparingInt(Order::getStartDate));
+        System.out.format("CA: %10.2f\n", revenue(orders, debug));
     }
 }
 

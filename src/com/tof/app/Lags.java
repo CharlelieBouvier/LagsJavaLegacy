@@ -1,48 +1,44 @@
 package com.tof.app;
 
 public class Lags {
-    static final boolean debug = false;
-
-    // ==================
-    // fonction principale
-    // ===================
+    static final boolean DEBUG = false;
 
     public static void main(String[] args) {
-        LagsService service = new LagsService();
-        service.getFichierOrder("ORDRES.CSV");
-        boolean flag = false;
-        // tant que ce n'est pas la fin du programme
-        while (!flag) {
-            // met la commande à Z
-            char commande = 'Z';
-            while (commande != 'A' && commande != 'L' && commande != 'S' && commande != 'Q' && commande != 'C') {
+        LagsService lagsService = new LagsService();
+        lagsService.loadOrdersFromFile("ORDRES.CSV");
+        boolean exitProgram = false;
+
+        while (!exitProgram) {
+
+            char input = 'Z';
+            while (input != 'A' && input != 'L' && input != 'S' && input != 'Q' && input != 'C') {
                 System.out.println("A)JOUTER UN ORDRE  L)ISTER   C)ALCULER CA  S)UPPRIMER  Q)UITTER");
                 try {
                     char keyInfo = (char) System.in.read();
-                    commande = Character.toUpperCase(keyInfo);
-                    System.out.print(commande);
+                    input = Character.toUpperCase(keyInfo);
+                    System.out.print(input);
                 } catch (java.io.IOException e) {
                     System.out.print("IO Exception");
                 }
-                switch (commande) {
+                switch (input) {
                     case 'Q': {
-                        flag = true;
+                        exitProgram = true;
                         break;
                     }
                     case 'L': {
-                        service.liste();
+                        lagsService.listOrders();
                         break;
                     }
                     case 'A': {
-                        service.ajouterOrdre();
+                        lagsService.addOrder();
                         break;
                     }
                     case 'S': {
-                        service.suppression();
+                        lagsService.deleteOrder();
                         break;
                     }
                     case 'C': {
-                        service.calculerLeCA(debug);
+                        lagsService.computeRevenue(DEBUG);
                         break;
                     }
                 }

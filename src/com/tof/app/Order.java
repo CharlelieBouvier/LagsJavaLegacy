@@ -1,12 +1,12 @@
 package com.tof.app;
 
-public class Ordre implements Comparable<Ordre> {
+public class Order implements Comparable<Order> {
     private String id;
     private int debut;
     private int duree;
     private double prix;
 
-    public Ordre(String id, int debut, int duree, double prix)
+    public Order(String id, int debut, int duree, double prix)
     {
         this.id = id;
         this.debut = debut;  // au format AAAAJJJ par exemple 25 février 2015 = 2015056
@@ -18,19 +18,19 @@ public class Ordre implements Comparable<Ordre> {
        return this.id;
     }
     // debut
-    public int getDebut() {
+    public int getStartDate() {
         return this.debut;
     }
     // duree
-    public int getDuree() {
+    public int getDuration() {
         return this.duree;
     }
     // valeur
-    public double prix() {
+    public double getPrice() {
         return this.prix;
     }
-    public int compareTo(Ordre other) {
-        return this.debut - other.getDebut();
+    public int compareTo(Order other) {
+        return this.debut - other.getStartDate();
     }
 
 }
