@@ -113,8 +113,7 @@ class LagsService {
         double revenueWithFollowingOrders = revenue(followingOrders, debug);
         if (debug) {
             printer.format("%10.2f\n", Math.max(revenueWithFirstOrder, revenueWithFollowingOrders));
-        } else
-            printer.print(".");
+        }
         return Math.max(revenueWithFirstOrder, revenueWithFollowingOrders);
     }
 

@@ -20,8 +20,8 @@ class LagsTest {
         Lags.printStream = printStream;
         Lags.inputStream = inputStream;
         Lags.main(null);
-        String expected = Files.readString(Path.of(this.getClass().getClassLoader().getResource("ExpectedOutput.txt").toURI()));
-        assertEquals(expected, baos.toString());
+        String expected = Files.readString(Path.of(this.getClass().getClassLoader().getResource("ExpectedOutput.txt").toURI())).replace("\r", "").replace("\n", "");
+        assertEquals(expected, baos.toString().replace("\r", "").replace("\n", ""));
     }
 
     @Test
