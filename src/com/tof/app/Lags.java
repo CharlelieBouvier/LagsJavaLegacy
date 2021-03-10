@@ -50,7 +50,7 @@ public class Lags {
                         break;
                     }
                     case 'C': {
-                        lagsService.computeRevenue(DEBUG);
+                        lagsService.computeRevenue();
                         break;
                     }
                 }

@@ -1,5 +1,6 @@
 package com.tof.app;
 
+import java.time.Instant;
 import java.util.*;
 import java.nio.file.Paths;
 import java.nio.file.Files;
@@ -10,6 +11,7 @@ import java.nio.file.StandardOpenOption;
 import static java.util.Comparator.*;
 
 class LagsService {
+    private final DateHelper dateHelper = new DateHelper();
     private List<Order> orders = new ArrayList<>();
     private OutputPrinter printer;
     private InputReader reader;
@@ -95,32 +97,15 @@ class LagsService {
         saveOrders("ORDRES.CSV");
     }
 
-    private double revenue(List<Order> orders, boolean debug) {
-        if (orders.size() == 0)
-            return 0.0;
-        Order firstOrder = orders.get(0);
-        List<Order> compatibleOrders = new ArrayList<>();
-        for (Order o : this.orders) {
-            if (o.getStartDate() >= firstOrder.getStartDate() + firstOrder.getDuration()) {
-                compatibleOrders.add(o);
-            }
-        }
-        List<Order> followingOrders = new ArrayList<>();
-        for (int i = 1; i < orders.size(); i++) {
-            followingOrders.add(orders.get(i));
-        }
-        double revenueWithFirstOrder = firstOrder.getPrice() + revenue(compatibleOrders, debug);
-        double revenueWithFollowingOrders = revenue(followingOrders, debug);
-        if (debug) {
-            printer.format("%10.2f\n", Math.max(revenueWithFirstOrder, revenueWithFollowingOrders));
-        }
-        return Math.max(revenueWithFirstOrder, revenueWithFollowingOrders);
+    protected Instant getDateFromInt(int d) {
+        return dateHelper.getDateFromInt(d);
     }
 
-    public void computeRevenue(boolean debug) {
+    public void computeRevenue() {
         printer.println("CALCUL CA..");
         orders.sort(comparingInt(Order::getStartDate));
-        printer.format("CA: %10.2f\n", revenue(orders, debug));
+        RevenueCalculator calculator = new RevenueCalculator();
+        printer.format("CA: %10.2f\n", calculator.revenue(orders));
     }
 }
 

@@ -35,4 +35,21 @@ class LagsTest {
         String expected = "123456789";
         assertTrue(baos.toString().contains(expected));
     }
+
+    @Test
+    public void revenueTest() {
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream printStream = new PrintStream(baos);
+        InputStream inputStream = new ByteArrayInputStream("C\r\nQ\r\n".getBytes());
+        OutputPrinter printer = new OutputPrinter(printStream);
+        InputReader reader = new InputReader(inputStream);
+
+        LagsService lagsService = new LagsService(printer, reader);
+        lagsService.loadOrdersFromFile("ORDER_BUG.CSV");
+        lagsService.computeRevenue();
+        String expected = "CALCUL CA..CA:    2000,00";
+        assertEquals(expected, baos.toString().replace("\r", "").replace("\n", ""));
+
+    }
 }
