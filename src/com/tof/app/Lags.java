@@ -1,10 +1,17 @@
 package com.tof.app;
 
+import java.io.InputStream;
+import java.io.PrintStream;
+
 public class Lags {
     static final boolean DEBUG = false;
+    public static PrintStream printStream = System.out;
+    public static InputStream inputStream = System.in;
 
     public static void main(String[] args) {
-        LagsService lagsService = new LagsService();
+        OutputPrinter printer = new OutputPrinter(printStream);
+        InputReader reader = new InputReader(inputStream);
+        LagsService lagsService = new LagsService(printer, reader);
         lagsService.loadOrdersFromFile("ORDRES.CSV");
         boolean exitProgram = false;
 
@@ -12,13 +19,14 @@ public class Lags {
 
             char input = 'Z';
             while (input != 'A' && input != 'L' && input != 'S' && input != 'Q' && input != 'C') {
-                System.out.println("A)JOUTER UN ORDRE  L)ISTER   C)ALCULER CA  S)UPPRIMER  Q)UITTER");
+
+                printer.println("A)JOUTER UN ORDRE  L)ISTER   C)ALCULER CA  S)UPPRIMER  Q)UITTER");
                 try {
-                    char keyInfo = (char) System.in.read();
+                    char keyInfo = (char) reader.read();
                     input = Character.toUpperCase(keyInfo);
-                    System.out.print(input);
+                    printer.print(input);
                 } catch (java.io.IOException e) {
-                    System.out.print("IO Exception");
+                    printer.print("IO Exception");
                 }
                 switch (input) {
                     case 'Q': {
