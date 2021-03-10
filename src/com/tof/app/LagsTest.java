@@ -6,6 +6,7 @@ import java.io.*;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,5 +22,17 @@ class LagsTest {
         Lags.main(null);
         String expected = Files.readString(Path.of(this.getClass().getClassLoader().getResource("ExpectedOutput.txt").toURI()));
         assertEquals(expected, baos.toString());
+    }
+
+    @Test
+    public void pathToOrderTest() throws URISyntaxException, IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream printStream = new PrintStream(baos);
+        InputStream inputStream = new ByteArrayInputStream("C\r\nQ\r\n".getBytes());
+        Lags.printStream = printStream;
+        Lags.inputStream = inputStream;
+        Lags.main(new String[]{"123456789.CSV"});
+        String expected = "123456789";
+        assertTrue(baos.toString().contains(expected));
     }
 }

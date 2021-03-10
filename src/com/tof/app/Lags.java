@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.io.PrintStream;
 
 public class Lags {
+    public static String PATH_TO_ORDER = "ORDRES.CSV";
     static final boolean DEBUG = false;
     public static PrintStream printStream = System.out;
     public static InputStream inputStream = System.in;
@@ -12,7 +13,10 @@ public class Lags {
         OutputPrinter printer = new OutputPrinter(printStream);
         InputReader reader = new InputReader(inputStream);
         LagsService lagsService = new LagsService(printer, reader);
-        lagsService.loadOrdersFromFile("ORDRES.CSV");
+        if (null != args && args.length > 0) {
+            PATH_TO_ORDER = args[0];
+        }
+        lagsService.loadOrdersFromFile(PATH_TO_ORDER);
         boolean exitProgram = false;
 
         while (!exitProgram) {
